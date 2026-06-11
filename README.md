@@ -22,25 +22,17 @@ Hopefully one day Cobalt Strike will officially support developing custom Beacon
 - SOCKS proxy
 
 ## Demo
-Generating payloads with the Aggressor Script
-![Linux Beacon Payload Generation](demo/generate_payloads.gif)
+Later
 
 Running commands & BOFs in the Linux Beacon
-![Linux Beacon Commands Demo](demo/commands.gif)
+Later
 
 ## Setup
 You can view the setup steps in the [SETUP](SETUP.md) file.
 
-## Special Thanks
-Thank you to [Kyle Avery](https://x.com/kyleavery) for your help with integrating BOF execution and testing out the implant.
-
-## Future goals
-* Add support for custom C2 profiles
-* Add TCP listener + connect functionality
-* Continue fixing bugs
-
 ## Resources
-- Cobalt Strike (wow!)
+- [CobaltStrike-Linux-Beacon].(https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon/)
+- Cobalt Strike 
 - [TrustedSec's ELFLoader & BOFs](https://github.com/trustedsec/ELFLoader)
 - [Outflank's BOFs](https://github.com/outflanknl/nix_bof_template)
 - [PaloAltoNetworks Unit42](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
