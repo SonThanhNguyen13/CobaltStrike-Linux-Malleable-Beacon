@@ -31,7 +31,7 @@ Later
 You can view the setup steps in the [SETUP](SETUP.md) file.
 
 ## Resources
-- [CobaltStrike-Linux-Beacon].(https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon/)
+- CobaltStrike-Linux-Beacon: https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon/
 - Cobalt Strike 
 - [TrustedSec's ELFLoader & BOFs](https://github.com/trustedsec/ELFLoader)
 - [Outflank's BOFs](https://github.com/outflanknl/nix_bof_template)
