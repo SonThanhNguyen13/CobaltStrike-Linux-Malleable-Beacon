@@ -2,8 +2,7 @@
 Linux beacon for Cobalt Strike, works with Malleable profile
 
 # Warning
-Vibe code 100%
-Highly unstable
+Vibe code 100%. Highly unstable
 
 # Cobalt Strike Linux Beacon
 
