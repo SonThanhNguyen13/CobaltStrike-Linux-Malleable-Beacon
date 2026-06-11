@@ -24,9 +24,6 @@ Hopefully one day Cobalt Strike will officially support developing custom Beacon
 ## Demo
 Later
 
-Running commands & BOFs in the Linux Beacon
-Later
-
 ## Setup
 You can view the setup steps in the [SETUP](SETUP.md) file.
 
