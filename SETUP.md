@@ -6,6 +6,11 @@ The Cobalt Strike client compiles the implant through an Aggressor Script. There
 
 ##### 1. Place project in appropriate location
 Clone this project onto the Linux machine where you use the Cobalt Strike client. Then open the `CobaltStrike-Linux-Beacon/CustomBeacon.cna` file and set the absolute path to the project folder on the first line.
+Update the first line of CustomBeacon.cna and set CustomBeaconProjectFolder to the absolute path of your local CobaltStrike-Linux-Beacon directory before loading the script.
+``` 
+$CustomBeaconProjectFolder = "/home/s3th/CobaltStrike-Linux-Beacon/"; # <-- SET THIS to the absolute path of CobaltStrike-Linux-Beacon on the current machine
+```
+
 
 ##### 2. Retrieve Teamserver Publickey
 These steps are to retrieve the teamserver's publickey from `.cobaltstrike.beacon_keys` so that it can be used by the Linux Beacon for initial communication.
