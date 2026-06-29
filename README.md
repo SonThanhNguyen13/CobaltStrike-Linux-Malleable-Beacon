@@ -16,7 +16,7 @@ Hopefully one day Cobalt Strike will officially support developing custom Beacon
 
 
 ## Features
-- HTTP/S listener support (default C2 profile)
+- HTTP/S listener support (Malleable C2 profile)
 - Contains some built-in commands: `sleep`, `cd`, `pwd`, `shell`, `ls`, `exit`, `upload`, `download`
 - Linux BOF execution using TrustedSec's ELFLoader. Supports both TrustedSec & Outflank BOFs
 - SOCKS proxy
